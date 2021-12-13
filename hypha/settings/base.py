@@ -770,3 +770,7 @@ if 'AWS_STORAGE_BUCKET_NAME' in env:
 
 MATOMO_URL = env.get('MATOMO_URL', False)
 MATOMO_SITEID = env.get('MATOMO_SITEID', False)
+
+# Form Rate-Limit Configuration
+# DEFAULT_RATE_LIMIT is used by all the forms unless which is set 5 requests/minute by default
+DEFAULT_RATE_LIMIT = env.get('DEFAULT_RATE_LIMIT', '5/m')
