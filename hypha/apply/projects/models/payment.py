@@ -138,6 +138,9 @@ class Invoice(models.Model):
             if self.status in {SUBMITTED, CHANGES_REQUESTED, RESUBMITTED}:
                 return True
 
+        if user.is_finance or user.is_finance_level2:
+            return False
+
         if user.is_apply_staff:
             if self.status in {SUBMITTED, RESUBMITTED}:
                 return True

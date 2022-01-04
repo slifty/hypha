@@ -143,8 +143,18 @@ DEBUG_TOOLBAR_CONFIG = {
 }
 
 WEBPACK_LOADER['DEFAULT'].update({
-    'STATS_FILE': os.path.join(BASE_DIR, './hypha/static_compiled/app/webpack-stats.json'),
+    'STATS_FILE': os.path.join(BASE_DIR, r'hypha\static_compiled\app\webpack-stats.json'),
 })
 
 # Required for testing the apis from postman
 REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] + ('rest_framework.authentication.BasicAuthentication', )
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'hypha',
+        'USER': 'postgres',
+        'PASSWORD': 'root',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
+}

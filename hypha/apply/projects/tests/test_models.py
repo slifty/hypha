@@ -5,10 +5,14 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hypha.apply.funds.tests.factories import ApplicationSubmissionFactory
-from hypha.apply.users.tests.factories import ApplicantFactory, StaffFactory
+from hypha.apply.users.tests.factories import ApplicantFactory, FinanceFactory, StaffFactory
 
 from ..models.payment import (
+    APPROVED_BY_FINANCE1,
+    APPROVED_BY_FINANCE2,
+    APPROVED_BY_STAFF,
     CHANGES_REQUESTED,
+    CHANGES_REQUESTED_BY_FINANCE1,
     DECLINED,
     PAID,
     RESUBMITTED,
@@ -82,65 +86,133 @@ class TestProjectModel(TestCase):
 
 
 class TestInvoiceModel(TestCase):
-    def test_staff_can_delete_from_submitted(self):
+
+    def test_staff_can_edit_delete_from_submitted(self):
         invoice = InvoiceFactory(status=SUBMITTED)
         staff = StaffFactory()
-
         self.assertTrue(invoice.can_user_delete(staff))
+        self.assertTrue(invoice.can_user_edit(staff))
 
-    def test_staff_cant_delete_from_resubmitted(self):
+    def test_staff_cant_edit_delete_from_resubmitted(self):
         invoice = InvoiceFactory(status=RESUBMITTED)
         staff = StaffFactory()
-
         self.assertFalse(invoice.can_user_delete(staff))
+        self.assertTrue(invoice.can_user_edit(staff))
 
-    def test_staff_cant_delete_from_changes_requested(self):
+    def test_staff_cant_edit_delete_from_changes_requested(self):
         invoice = InvoiceFactory(status=CHANGES_REQUESTED)
         staff = StaffFactory()
-
         self.assertFalse(invoice.can_user_delete(staff))
+        self.assertFalse(invoice.can_user_edit(staff))
 
-    def test_staff_cant_delete_from_paid(self):
+    def test_staff_cant_edit_delete_from_approved_by_staff(self):
+        invoice = InvoiceFactory(status=APPROVED_BY_STAFF)
+        staff = StaffFactory()
+        self.assertFalse(invoice.can_user_delete(staff))
+        self.assertFalse(invoice.can_user_edit(staff))
+
+    def test_staff_cant_edit_delete_from_changes_requested_by_finance1(self):
+        invoice = InvoiceFactory(status=CHANGES_REQUESTED_BY_FINANCE1)
+        staff = StaffFactory()
+        self.assertFalse(invoice.can_user_delete(staff))
+        self.assertFalse(invoice.can_user_edit(staff))
+
+    def test_staff_cant_edit_delete_from_paid(self):
         invoice = InvoiceFactory(status=PAID)
         staff = StaffFactory()
-
         self.assertFalse(invoice.can_user_delete(staff))
+        self.assertFalse(invoice.can_user_edit(staff))
 
-    def test_staff_cant_delete_from_declined(self):
+    def test_staff_cant_edit_delete_from_declined(self):
         invoice = InvoiceFactory(status=DECLINED)
         staff = StaffFactory()
-
         self.assertFalse(invoice.can_user_delete(staff))
+        self.assertFalse(invoice.can_user_edit(staff))
 
-    def test_can_user_delete_from_submitted(self):
+    def test_can_user_edit_delete_from_submitted(self):
         invoice = InvoiceFactory(status=SUBMITTED)
         user = ApplicantFactory()
-
         self.assertTrue(invoice.can_user_delete(user))
+        self.assertTrue(invoice.can_user_edit(user))
 
-    def test_user_cant_delete_from_resubmitted(self):
+    def test_user_cant_edit_delete_from_resubmitted(self):
         invoice = InvoiceFactory(status=RESUBMITTED)
         user = ApplicantFactory()
-
         self.assertFalse(invoice.can_user_delete(user))
+        self.assertTrue(invoice.can_user_edit(user))
 
-    def test_user_can_delete_from_changes_requested(self):
+    def test_user_can_edit_delete_from_changes_requested(self):
         invoice = InvoiceFactory(status=CHANGES_REQUESTED)
         user = ApplicantFactory()
-
         self.assertFalse(invoice.can_user_delete(user))
+        self.assertTrue(invoice.can_user_edit(user))
 
-    def test_user_cant_delete_from_paid(self):
+    def test_user_cant_edit_delete_from_approved_by_staff(self):
+        invoice = InvoiceFactory(status=APPROVED_BY_STAFF)
+        user = ApplicantFactory()
+        self.assertFalse(invoice.can_user_delete(user))
+        self.assertFalse(invoice.can_user_edit(user))
+
+    def test_user_cant_edit_delete_from_changes_requested_by_finance1(self):
+        invoice = InvoiceFactory(status=CHANGES_REQUESTED_BY_FINANCE1)
+        user = ApplicantFactory()
+        self.assertFalse(invoice.can_user_delete(user))
+        self.assertFalse(invoice.can_user_edit(user))
+
+    def test_user_cant_edit_delete_from_paid(self):
         invoice = InvoiceFactory(status=PAID)
         user = ApplicantFactory()
-
         self.assertFalse(invoice.can_user_delete(user))
+        self.assertFalse(invoice.can_user_edit(user))
 
-    def test_user_cant_delete_from_declined(self):
+    def test_user_cant_edit_delete_from_declined(self):
         invoice = InvoiceFactory(status=DECLINED)
         user = ApplicantFactory()
-
         self.assertFalse(invoice.can_user_delete(user))
+        self.assertFalse(invoice.can_user_edit(user))
+
+    def test_finance_level1_cant_edit_delete_from_submitted(self):
+        invoice = InvoiceFactory(status=SUBMITTED)
+        finance_level1 = FinanceFactory()
+        self.assertTrue(invoice.can_user_delete(finance_level1))
+        self.assertFalse(invoice.can_user_edit(finance_level1))
+
+    def test_finance_level1_cant_edit_delete_from_resubmitted(self):
+        invoice = InvoiceFactory(status=RESUBMITTED)
+        finance_level1 = ApplicantFactory()
+        self.assertFalse(invoice.can_user_delete(finance_level1))
+        self.assertTrue(invoice.can_user_edit(finance_level1))
+
+    def test_finance_level1_cant_edit_delete_from_changes_requested(self):
+        invoice = InvoiceFactory(status=CHANGES_REQUESTED)
+        finance_level1 = ApplicantFactory()
+        self.assertFalse(invoice.can_user_delete(finance_level1))
+        self.assertTrue(invoice.can_user_edit(finance_level1))
+
+    def test_finance_level1_cant_edit_delete_from_approved_by_staff(self):
+        invoice = InvoiceFactory(status=APPROVED_BY_STAFF)
+        finance_level1 = ApplicantFactory()
+        self.assertFalse(invoice.can_user_delete(finance_level1))
+        self.assertFalse(invoice.can_user_edit(finance_level1))
+
+    def test_finance_level1_cant_edit_delete_from_changes_requested_by_finance1(self):
+        invoice = InvoiceFactory(status=CHANGES_REQUESTED_BY_FINANCE1)
+        finance_level1 = ApplicantFactory()
+        self.assertFalse(invoice.can_user_delete(finance_level1))
+        self.assertFalse(invoice.can_user_edit(finance_level1))
+
+    def test_finance_level1_cant_edit_delete_from_paid(self):
+        invoice = InvoiceFactory(status=PAID)
+        finance_level1 = ApplicantFactory()
+        self.assertFalse(invoice.can_user_delete(finance_level1))
+        self.assertFalse(invoice.can_user_edit(finance_level1))
+
+    def test_finance_level1_cant_edit_delete_from_declined(self):
+        invoice = InvoiceFactory(status=DECLINED)
+        finance_level1 = ApplicantFactory()
+        self.assertFalse(invoice.can_user_delete(finance_level1))
+        self.assertFalse(invoice.can_user_edit(finance_level1))
+
 
     def test_paid_value_used_when_no_paid_value(self):
         invoice = InvoiceFactory(
